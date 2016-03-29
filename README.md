@@ -54,3 +54,23 @@ trainBackUseCase.updateReception(token, receptionStatus)
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new CallBackUpdateReceptionStartBack(handlerUpdateReception, presEmqttMessage));
 ```
+
+# lambda表达式中使用final变量
+observable中使用lambda表达式，可以直接使用定义的变量，使用的是final形式
+```Java
+public void showPostDialog(String title,String content) {
+    //title、content作为final变量传进来可以直接用，任何在lamada表达式用的变量都是，可以再函数中定义其他变量也可以直接引入
+    Observable.just(1)
+            .subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(result -> {
+                if(progressDialog!=null){
+                    //如果存在先取消掉原来的，然后显示新的
+                    hidePostDialog();
+                }
+                progressDialog = ProgressDialog.show(getActivity(), title, content, true, false);
+            },throwable -> {
+                throwable.printStackTrace();
+            });
+}
+```
