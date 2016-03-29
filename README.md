@@ -37,3 +37,20 @@ private void stopTimmer(){
     observable = null;
 }
 ```
+
+# error操作符-创建直接执行onError的Observable对象
+可以用于测试的环境
+```Java
+trainBackUseCase.updateReception(token, receptionStatus)
+        //模拟网络延迟错误，10次以后才正常
+        .flatMap(result -> {
+            if (postUpdateReceptionStartCount > 10) {
+                return Observable.just(result);
+            }else{
+                return Observable.error(new Exception());
+            }
+        })
+        .subscribeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new CallBackUpdateReceptionStartBack(handlerUpdateReception, presEmqttMessage));
+```
