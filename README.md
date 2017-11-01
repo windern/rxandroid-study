@@ -1,76 +1,18 @@
 # rxandroid学习文档
-.interval用法
-interval创建完成Obserable的可以替换timertask
 
-```Java
-private Observable<Long> observable = null;
-private Subscriber<Long> subscriber = null;
-private void startTimer(){
-    Timber.d("startTimer");
-    observable = Observable.interval(IntervalTime, TimeUnit.SECONDS);
-    subscriber = new Subscriber<Long>() {
-        @Override
-        public void onCompleted() {
+# 什么是响应式编程
 
-        }
+响应式编程是一种基于异步数据流概念的编程模式。数据流就像一条河：它可以被观测，被过滤，被操作，或者为新的消费者与另外一条流合并为一条新的流。
 
-        @Override
-        public void onError(Throwable e) {
+响应式编程的一个关键概念是事件。事件可以被等待，可以触发过程，也可以触发其它事件。事件是唯一的以合适的方式将我们的现实世界映射到我们的软件中：如果屋里太热了我们就打开一扇窗户。同样的，当我们的天气app从服务端获取到新的天气数据后，我们需要更新app上展示天气信息的UI；汽车上的车道偏移系统探测到车辆偏移了正常路线就会提醒驾驶者纠正，就是是响应事件。
 
-        }
+今天，响应式编程最通用的一个场景是UI：我们的移动App必须做出对网络调用、用户触摸输入和系统弹框的响应。在这个世界上，软件之所以是事件驱动并响应的是因为现实生活也是如此。
 
-        @Override
-        public void onNext(Long aLong) {
-            doSomeThing();
-        }
-    };
-
-    observable.subscribeOn(Schedulers.newThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(subscriber);
-}
-private void stopTimmer(){
-    if(subscriber!=null && !subscriber.isUnsubscribed()){
-        subscriber.unsubscribe();
-    }
-    subscriber = null;
-    observable = null;
-}
+# Rxjava2的配置
+.gadle中添加配置
+```
+compile 'io.reactivex.rxjava2:rxjava:2.1.6'
+compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 ```
 
-# error操作符-创建直接执行onError的Observable对象
-可以用于测试的环境
-```Java
-trainBackUseCase.updateReception(token, receptionStatus)
-        //模拟网络延迟错误，10次以后才正常
-        .flatMap(result -> {
-            if (postUpdateReceptionStartCount > 10) {
-                return Observable.just(result);
-            }else{
-                return Observable.error(new Exception());
-            }
-        })
-        .subscribeOn(Schedulers.newThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new CallBackUpdateReceptionStartBack(handlerUpdateReception, presEmqttMessage));
-```
 
-# lambda表达式中使用final变量
-observable中使用lambda表达式，可以直接使用定义的变量，使用的是final形式
-```Java
-public void showPostDialog(String title,String content) {
-    //title、content作为final变量传进来可以直接用，任何在lamada表达式用的变量都是，可以再函数中定义其他变量也可以直接引入
-    Observable.just(1)
-            .subscribeOn(Schedulers.newThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(result -> {
-                if(progressDialog!=null){
-                    //如果存在先取消掉原来的，然后显示新的
-                    hidePostDialog();
-                }
-                progressDialog = ProgressDialog.show(getActivity(), title, content, true, false);
-            },throwable -> {
-                throwable.printStackTrace();
-            });
-}
-```
